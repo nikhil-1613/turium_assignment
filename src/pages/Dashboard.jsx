@@ -12,7 +12,7 @@ import { Dialog } from "@headlessui/react";
 import { useNavigate } from "react-router-dom";
 import useDarkMode from "../hooks/useDarkMode";
 
-const statusOptions = ["Running", "Error", "Stopped"];
+const statusOptions = ["Running", "Error", "Stopped", "Online","Offline"];
 const SERVICES_PER_PAGE = 10;
 const statusStyles = {
   Running: {
@@ -28,11 +28,21 @@ const statusStyles = {
     color: "bg-amber-100 text-amber-700 dark:bg-amber-700 dark:text-amber-100",
     icon: <MdPauseCircleFilled className="w-4 h-4" />,
   },
+  Online: {
+    color: "bg-green-100 text-green-800 dark:bg-green-800 dark:text-green-100",
+    icon: <MdCheckCircle className="w-4 h-4" />,
+  },
+  Offline: {
+    color: "bg-gray-200 text-gray-800 dark:bg-gray-700 dark:text-gray-300",
+    icon: <MdPauseCircleFilled className="w-4 h-4" />,
+  },
 };
 
 export default function DashboardPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilters, setStatusFilters] = useState({
+    Online: true,
+    Offline: true,
     Running: true,
     Error: true,
     Stopped: true,
@@ -71,7 +81,7 @@ export default function DashboardPage() {
           toast.success("Services refreshed");
         })
         .catch(() => toast.error("Refresh failed"));
-    }, 30000);
+    }, 15000);
     return () => clearInterval(interval);
   }, []);
 
@@ -84,21 +94,21 @@ export default function DashboardPage() {
       return 0;
     });
   };
-
   const filtered = sortServices(
     services.filter(
       (s) =>
-        s.name.toLowerCase().includes(searchQuery.toLowerCase()) &&
+        (s.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          s.type.toLowerCase().includes(searchQuery.toLowerCase())) &&
         statusFilters[s.status]
     )
   );
-    // Paginated
+
+  // Paginated
   const totalPages = Math.ceil(filtered.length / SERVICES_PER_PAGE);
   const paginated = filtered.slice(
     (currentPage - 1) * SERVICES_PER_PAGE,
     currentPage * SERVICES_PER_PAGE
   );
-
 
   const handleDelete = (name) => {
     const service = services.find((s) => s.name === name);
@@ -260,7 +270,7 @@ export default function DashboardPage() {
             </thead>
             <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
               <AnimatePresence>
-                {filtered.map((s) => {
+                {paginated.map((s) => {
                   const { color, icon } = statusStyles[s.status];
                   return (
                     <motion.tr
@@ -298,7 +308,7 @@ export default function DashboardPage() {
                             setEditService(s);
                             setFormData({
                               name: s.name,
-                              type:s.type,
+                              type: s.type,
                               status: s.status,
                               updateDesc: "",
                             });
@@ -322,7 +332,7 @@ export default function DashboardPage() {
         {/* Mobile Cards */}
         <div className="block md:hidden space-y-4">
           <AnimatePresence>
-            {filtered.map((s) => {
+            {paginated.map((s) => {
               const { color, icon } = statusStyles[s.status];
               return (
                 <motion.div
@@ -341,14 +351,19 @@ export default function DashboardPage() {
                     className="bg-white dark:bg-gray-800 rounded-lg shadow p-4 cursor-pointer"
                   >
                     <div className="flex justify-between items-center mb-2">
-                      <h2 className="text-lg font-semibold">{s.name}</h2>
-
+                      <div className="flex flex-col">
+                        <h2 className="text-lg font-semibold">{s.name}</h2>
+                        <p className="text-sm text-gray-500 dark:text-gray-400">
+                          {s.type}
+                        </p>
+                      </div>
                       <div
                         className={`flex items-center gap-1 px-2 py-1 text-sm rounded-full ${color}`}
                       >
                         {icon} {s.status}
                       </div>
                     </div>
+
                     <p className="text-sm text-gray-600 dark:text-gray-300">
                       Last updated: {new Date(s.updatedAt).toLocaleTimeString()}
                     </p>
@@ -359,6 +374,7 @@ export default function DashboardPage() {
                           setEditService(s);
                           setFormData({
                             name: s.name,
+                            type: s.type,
                             status: s.status,
                             updateDesc: "",
                           });
@@ -458,23 +474,33 @@ export default function DashboardPage() {
         )}
       </AnimatePresence>
       {/* Pagination Controls */}
-      {totalPages > 1 && (
-        <div className="mt-6 flex justify-center gap-2">
-          {Array.from({ length: totalPages }, (_, i) => (
-            <button
-              key={i}
-              onClick={() => setCurrentPage(i + 1)}
-              className={`px-3 py-1 rounded ${
-                currentPage === i + 1
-                  ? "bg-blue-600 text-white"
-                  : "bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-white"
-              }`}
-            >
-              {i + 1}
-            </button>
-          ))}
-        </div>
-      )}
+      <div className="mt-6 flex justify-center gap-2 flex-wrap">
+        <button
+          onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+          className="px-3 py-1 rounded bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-white"
+        >
+          Prev
+        </button>
+        {Array.from({ length: totalPages }, (_, i) => (
+          <button
+            key={i}
+            onClick={() => setCurrentPage(i + 1)}
+            className={`px-3 py-1 rounded ${
+              currentPage === i + 1
+                ? "bg-blue-600 text-white"
+                : "bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-white"
+            }`}
+          >
+            {i + 1}
+          </button>
+        ))}
+        <button
+          onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+          className="px-3 py-1 rounded bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-white"
+        >
+          Next
+        </button>
+      </div>
     </div>
   );
 }
