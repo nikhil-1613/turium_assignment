@@ -13,6 +13,7 @@ import { useNavigate } from "react-router-dom";
 import useDarkMode from "../hooks/useDarkMode";
 
 const statusOptions = ["Running", "Error", "Stopped"];
+const SERVICES_PER_PAGE = 10;
 const statusStyles = {
   Running: {
     color:
@@ -39,6 +40,7 @@ export default function DashboardPage() {
   const [services, setServices] = useState([]);
   const [formData, setFormData] = useState({
     name: "",
+    type: "",
     status: "Running",
     updateDesc: "",
   });
@@ -49,6 +51,7 @@ export default function DashboardPage() {
 
   const navigate = useNavigate();
   const [isDarkMode, setIsDarkMode] = useDarkMode();
+  const [currentPage, setCurrentPage] = useState(1);
 
   // Initial fetch
   useEffect(() => {
@@ -89,6 +92,13 @@ export default function DashboardPage() {
         statusFilters[s.status]
     )
   );
+    // Paginated
+  const totalPages = Math.ceil(filtered.length / SERVICES_PER_PAGE);
+  const paginated = filtered.slice(
+    (currentPage - 1) * SERVICES_PER_PAGE,
+    currentPage * SERVICES_PER_PAGE
+  );
+
 
   const handleDelete = (name) => {
     const service = services.find((s) => s.name === name);
@@ -128,6 +138,7 @@ export default function DashboardPage() {
 
     const payload = {
       name: formData.name,
+      type: formData.type,
       status: formData.status,
       updatedAt: new Date().toISOString(),
       history: newHistory,
@@ -160,7 +171,7 @@ export default function DashboardPage() {
   };
 
   const resetForm = () => {
-    setFormData({ name: "", status: "Running", updateDesc: "" });
+    setFormData({ name: "", type: "", status: "Running", updateDesc: "" });
     setEditService(null);
     setShowModal(false);
   };
@@ -174,7 +185,12 @@ export default function DashboardPage() {
           <div className="flex gap-2">
             <button
               onClick={() => {
-                setFormData({ name: "", status: "Running", updateDesc: "" });
+                setFormData({
+                  name: "",
+                  type: "",
+                  status: "Running",
+                  updateDesc: "",
+                });
                 setEditService(null);
                 setShowModal(true);
               }}
@@ -222,7 +238,7 @@ export default function DashboardPage() {
           <table className="w-full table-auto bg-white dark:bg-gray-800 border-separate border-spacing-0 rounded shadow-md">
             <thead className="bg-gray-100 dark:bg-gray-700 border-b border-gray-300 dark:border-gray-600">
               <tr>
-                {["name", "status", "updatedAt"].map((key) => (
+                {["name", "type", "status", "updatedAt"].map((key) => (
                   <th
                     key={key}
                     className="px-6 py-3 text-left text-sm font-semibold text-gray-700 dark:text-gray-100 border-b border-gray-200 dark:border-gray-600 cursor-pointer"
@@ -265,6 +281,7 @@ export default function DashboardPage() {
                       >
                         {s.name}
                       </td>
+                      <td className="px-6 py-4 cursor-pointer">{s.type}</td>
                       <td className="px-6 py-4">
                         <span
                           className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-sm font-medium ${color}`}
@@ -281,6 +298,7 @@ export default function DashboardPage() {
                             setEditService(s);
                             setFormData({
                               name: s.name,
+                              type:s.type,
                               status: s.status,
                               updateDesc: "",
                             });
@@ -324,6 +342,7 @@ export default function DashboardPage() {
                   >
                     <div className="flex justify-between items-center mb-2">
                       <h2 className="text-lg font-semibold">{s.name}</h2>
+
                       <div
                         className={`flex items-center gap-1 px-2 py-1 text-sm rounded-full ${color}`}
                       >
@@ -388,6 +407,14 @@ export default function DashboardPage() {
                   setFormData((prev) => ({ ...prev, name: e.target.value }))
                 }
               />
+              <input
+                className="w-full mb-3 px-4 py-2 rounded border dark:border-gray-600"
+                placeholder="Service type"
+                value={formData.type}
+                onChange={(e) =>
+                  setFormData((prev) => ({ ...prev, type: e.target.value }))
+                }
+              />
               <select
                 className="w-full mb-3 px-4 py-2 rounded border dark:border-gray-600"
                 value={formData.status}
@@ -430,6 +457,24 @@ export default function DashboardPage() {
           </Dialog>
         )}
       </AnimatePresence>
+      {/* Pagination Controls */}
+      {totalPages > 1 && (
+        <div className="mt-6 flex justify-center gap-2">
+          {Array.from({ length: totalPages }, (_, i) => (
+            <button
+              key={i}
+              onClick={() => setCurrentPage(i + 1)}
+              className={`px-3 py-1 rounded ${
+                currentPage === i + 1
+                  ? "bg-blue-600 text-white"
+                  : "bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-white"
+              }`}
+            >
+              {i + 1}
+            </button>
+          ))}
+        </div>
+      )}
     </div>
   );
 }

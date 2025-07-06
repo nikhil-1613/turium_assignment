@@ -4,6 +4,7 @@ let services = [
   {
     id: '1',
     name: 'Auth Service',
+    type:'core',
     status: 'Running',
     updatedAt: new Date().toISOString(),
     history: [
