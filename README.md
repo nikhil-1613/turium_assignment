@@ -1,4 +1,4 @@
-# 🧠 Microservices Dashboard
+#  Microservices Dashboard
 
 A responsive and animated dashboard built in *React* to manage microservices with full *CRUD operations, **dark mode, **status filtering, **sorting, **search, and **toast notifications*. Uses Mock Service Worker (MSW) for local API mocking and Framer Motion for UI animation.
 
