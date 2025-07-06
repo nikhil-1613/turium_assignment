@@ -4,22 +4,22 @@ A responsive and animated dashboard built in *React* to manage microservices wit
 
 ---
 
-## 🚀 Features
+## Features
 
-- ⚙ *Add, Edit, Delete Services*
-- 🔍 *Search* by service name
-- 📊 *Filter* by status (Running, Error, Stopped)
-- 🔁 *Auto-refresh* every 30 seconds with toast
-- 📅 *Sort* by name, status, or last updated time
-- 🌙 *Dark mode* toggle with persistence
-- 📱 *Responsive* UI for desktop and mobile
-- 🍞 *Toasts* using react-hot-toast
-- ⚡ *Framer Motion* animations
-- 🧪 *Mock API* using MSW
+-  *Add, Edit, Delete Services*
+-  *Search* by service name
+-  *Filter* by status (Running, Error, Stopped)
+-  *Auto-refresh* every 30 seconds with toast
+-  *Sort* by name, status, or last updated time
+-  *Dark mode* toggle with persistence
+-  *Responsive* UI for desktop and mobile
+-  *Toasts* using react-hot-toast
+-  *Framer Motion* animations
+-  *Mock API* using MSW
 
 ---
 
-## 🛠 Tech Stack
+##  Tech Stack
 
 - React (Vite / CRA)
 - Tailwind CSS
@@ -31,7 +31,7 @@ A responsive and animated dashboard built in *React* to manage microservices wit
 
 ---
 
-## 📦 Installation
+##  Installation
 
 1. *Clone the repo*  
 ```bash
